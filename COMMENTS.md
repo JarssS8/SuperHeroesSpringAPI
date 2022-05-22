@@ -22,3 +22,4 @@ Como primeros puntos sobre el projecto a realizar:
 # Comenzando con el TDD
 
 Voy a crear primero los test para los controladores de nuestra API, ya que deberían ser los puntos de entrada.
+Para los paths voy a usar el path api/ seguido del nombre del controlador, ya que no se especifica nada.
