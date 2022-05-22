@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(SuperHeroesController.class)
-public class SuperHeroesControllerTests {
+public class SuperHeroesControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -33,10 +33,12 @@ public class SuperHeroesControllerTests {
     @BeforeEach
     public void setup() {
         superHeroesList = new ArrayList<>();
-        superHeroesList.add(new SuperHero(1,"Superman"));
-        superHeroesList.add(new SuperHero(2,"Batman"));
-        superHeroesList.add(new SuperHero(3,"Spiderman"));
-        superHeroesList.add(new SuperHero(4,"Manolito El Fuerte"));
+        superHeroesList.add(new SuperHero(1, "Superman"));
+        superHeroesList.add(new SuperHero(2, "Batman"));
+        superHeroesList.add(new SuperHero(3, "Spiderman"));
+        superHeroesList.add(new SuperHero(4, "Manolito El Fuerte"));
+        superHeroesList.add(new SuperHero(5, "El flautista"));
+        superHeroesList.add(new SuperHero(6, "Robert Widow"));
     }
 
 
@@ -85,5 +87,36 @@ public class SuperHeroesControllerTests {
                 .andExpect(MockMvcResultMatchers.jsonPath("id").value(superHero.getId()))
                 .andExpect(MockMvcResultMatchers.jsonPath("name").isNotEmpty())
                 .andExpect(MockMvcResultMatchers.jsonPath("name").value(superHero.getName()));
+    }
+
+    @Test
+    void getSuperHeroesByPartOfName_Expect200Code_ResponseOK() throws Exception {
+        List<SuperHero> resultSuperHeroesList = superHeroesList.stream().filter(superHero -> superHero.getName()
+                .toLowerCase().contains("man")).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+        String searchName = "man";
+
+        // Act
+        when(superHeroService.getSuperHeroByPartOfName(searchName)).thenReturn(resultSuperHeroesList);
+
+        //Assert
+        String path = String.format("%s/findByContainsName/%s", API_PATH, searchName);
+        mockMvc.perform(get(path).contentType("application/json")).andExpect(status().isOk());
+    }
+
+    @Test
+    void getSuperHeroesByPartOfName_ExpectSuperHeroes_ResponseOK() throws Exception {
+        List<SuperHero> resultSuperHeroesList = superHeroesList.stream().filter(superHero -> superHero.getName()
+                .toLowerCase().contains("man")).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+        String searchName = "man";
+
+        // Act
+        when(superHeroService.getSuperHeroByPartOfName(searchName)).thenReturn(resultSuperHeroesList);
+
+        //Assert
+        String path = String.format("%s/findByContainsName/%s", API_PATH, searchName);
+        mockMvc.perform(get(path).contentType("application/json"))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.size()").value(resultSuperHeroesList.size()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[*].name").isNotEmpty());
     }
 }

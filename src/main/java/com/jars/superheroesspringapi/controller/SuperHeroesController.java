@@ -36,4 +36,10 @@ public class SuperHeroesController {
     private ResponseEntity<SuperHero> getSuperHeroById(@PathVariable("id") long id) {
         return ok(superHeroesService.getSuperHeroByID(id));
     }
+
+    @GetMapping("/findByContainsName/{name}")
+    @ApiOperation(value = "Get super hero by contains name", response = SuperHero.class)
+    private ResponseEntity<List<SuperHero>> getSuperHeroesByContainsName(@PathVariable("name") String name) {
+        return ok(superHeroesService.getSuperHeroByPartOfName(name));
+    }
 }

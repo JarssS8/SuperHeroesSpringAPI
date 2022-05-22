@@ -25,4 +25,10 @@ public class SuperHeroesService {
         if (superHero == null) throw new NotSuperHeroFoundException();
         return superHero;
     }
+
+    public List<SuperHero> getSuperHeroByPartOfName(String partialName) {
+        List<SuperHero> superHeroesList = superHeroesRepository.findByNameContaining(partialName);
+        if (superHeroesList.isEmpty()) throw new NotSuperHeroesException();
+        return superHeroesList;
+    }
 }
