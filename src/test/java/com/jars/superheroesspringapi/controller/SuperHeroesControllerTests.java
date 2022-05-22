@@ -41,7 +41,7 @@ public class SuperHeroesControllerTests {
 
 
     @Test
-    void getAllSuperHeroesExpect200CodeResponseOK() throws Exception {
+    void getAllSuperHeroes_Expect200Code_ResponseOK() throws Exception {
         // Act
         when(superHeroService.getAllSuperHeroes()).thenReturn(superHeroesList);
 
@@ -50,7 +50,7 @@ public class SuperHeroesControllerTests {
     }
 
     @Test
-    void getAllSuperHeroesExpectSuperHeroesListResponseOK() throws Exception {
+    void getAllSuperHeroes_ExpectSuperHeroesList_ResponseOK() throws Exception {
         // Act
         when(superHeroService.getAllSuperHeroes()).thenReturn(superHeroesList);
 
@@ -58,5 +58,32 @@ public class SuperHeroesControllerTests {
         mockMvc.perform(get(API_PATH).contentType("application/json")).andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.size()").value(superHeroesList.size()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[*].name").isNotEmpty());
+    }
+
+    @Test
+    void getSuperHeroByID_Expect200Code_ResponseOK() throws Exception {
+        SuperHero superHero = superHeroesList.get(0);
+
+        // Act
+        when(superHeroService.getSuperHeroByID(superHero.getId())).thenReturn(superHero);
+
+        //Assert
+        mockMvc.perform(get(String.format("%s/%d", API_PATH, superHero.getId())).contentType("application/json")).andExpect(status().isOk());
+    }
+
+    @Test
+    void getSuperHeroById_ExpectSuperHero_ResponseOK() throws Exception {
+        SuperHero superHero = superHeroesList.get(0);
+
+        // Act
+        when(superHeroService.getSuperHeroByID(superHero.getId())).thenReturn(superHero);
+
+        //Assert
+        mockMvc.perform(get(String.format("%s/%d", API_PATH, superHero.getId())).contentType("application/json"))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("id").isNotEmpty())
+                .andExpect(MockMvcResultMatchers.jsonPath("id").value(superHero.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("name").isNotEmpty())
+                .andExpect(MockMvcResultMatchers.jsonPath("name").value(superHero.getName()));
     }
 }

@@ -20,7 +20,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(NotSuperHeroesException.class)
     public ResponseEntity<Object> handleGeneralException(NotSuperHeroesException e, WebRequest request) {
         HttpHeaders headers = new HttpHeaders();
-        List<ErrorItem> errorItems = Stream.of(new ErrorItem("No super heroes on the DB", "404",
+        List<ErrorItem> errorItems = Stream.of(new ErrorItem("No Super Heroes found", "404",
                 e.getMessage())).collect(Collectors.toList());
         return handleExceptionInternal(e, errorItems, headers, HttpStatus.NOT_FOUND, request);
     }
@@ -28,7 +28,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(NotSuperHeroFoundException.class)
     public ResponseEntity<Object> handleGeneralException(NotSuperHeroFoundException e, WebRequest request) {
         HttpHeaders headers = new HttpHeaders();
-        List<ErrorItem> errorItems = Stream.of(new ErrorItem("No super hero with that ID on the DB", "404",
+        List<ErrorItem> errorItems = Stream.of(new ErrorItem("No Super Hero ID found", "404",
                 e.getMessage())).collect(Collectors.toList());
         return handleExceptionInternal(e, errorItems, headers, HttpStatus.NOT_FOUND, request);
     }
