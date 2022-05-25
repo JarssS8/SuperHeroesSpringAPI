@@ -4,7 +4,10 @@ import com.jars.superheroesspringapi.entity.SuperHero;
 import com.jars.superheroesspringapi.exceptionhandling.exceptions.NotSuperHeroFoundException;
 import com.jars.superheroesspringapi.exceptionhandling.exceptions.NotSuperHeroesException;
 import com.jars.superheroesspringapi.respository.SuperHeroesRepository;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -21,6 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class SuperHeroServiceTest {
     @MockBean
     private SuperHeroesRepository superHeroesRepository;
@@ -29,13 +33,12 @@ public class SuperHeroServiceTest {
     private SuperHeroesService superHeroesService;
 
     @Test
+    @Order(1)
     void getAllSuperHeroes_ExpectNotSuperHeroesException() {
-        try {
-            //Arrange
-            List<SuperHero> superHeroesList = new ArrayList<>();
+        try{
 
             //Act
-            when(superHeroesRepository.findAll()).thenReturn(superHeroesList);
+            when(superHeroesRepository.findAll()).thenReturn(new ArrayList<>());
             List<SuperHero> result = superHeroesService.getAllSuperHeroes();
             fail("Must run the NotSuperHeroesException before this");
         } catch (NotSuperHeroesException e) {
