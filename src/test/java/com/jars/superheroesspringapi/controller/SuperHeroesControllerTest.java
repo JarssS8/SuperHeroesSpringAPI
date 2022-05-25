@@ -1,5 +1,6 @@
 package com.jars.superheroesspringapi.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jars.superheroesspringapi.entity.SuperHero;
 import com.jars.superheroesspringapi.service.SuperHeroesService;
 import org.junit.jupiter.api.BeforeEach;
@@ -7,7 +8,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.ArrayList;
@@ -48,7 +52,7 @@ public class SuperHeroesControllerTest {
         when(superHeroService.getAllSuperHeroes()).thenReturn(superHeroesList);
 
         //Assert
-        mockMvc.perform(get(API_PATH).contentType("application/json")).andExpect(status().isOk());
+        mockMvc.perform(get(API_PATH).contentType(MediaType.APPLICATION_JSON_VALUE)).andExpect(status().isOk());
     }
 
     @Test
@@ -57,7 +61,7 @@ public class SuperHeroesControllerTest {
         when(superHeroService.getAllSuperHeroes()).thenReturn(superHeroesList);
 
         //Assert
-        mockMvc.perform(get(API_PATH).contentType("application/json")).andExpect(status().isOk())
+        mockMvc.perform(get(API_PATH).contentType(MediaType.APPLICATION_JSON_VALUE)).andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.size()").value(superHeroesList.size()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[*].name").isNotEmpty());
     }
@@ -70,7 +74,7 @@ public class SuperHeroesControllerTest {
         when(superHeroService.getSuperHeroByID(superHero.getId())).thenReturn(superHero);
 
         //Assert
-        mockMvc.perform(get(String.format("%s/%d", API_PATH, superHero.getId())).contentType("application/json")).andExpect(status().isOk());
+        mockMvc.perform(get(String.format("%s/%d", API_PATH, superHero.getId())).contentType(MediaType.APPLICATION_JSON_VALUE)).andExpect(status().isOk());
     }
 
     @Test
@@ -81,7 +85,7 @@ public class SuperHeroesControllerTest {
         when(superHeroService.getSuperHeroByID(superHero.getId())).thenReturn(superHero);
 
         //Assert
-        mockMvc.perform(get(String.format("%s/%d", API_PATH, superHero.getId())).contentType("application/json"))
+        mockMvc.perform(get(String.format("%s/%d", API_PATH, superHero.getId())).contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("id").isNotEmpty())
                 .andExpect(MockMvcResultMatchers.jsonPath("id").value(superHero.getId()))
@@ -100,7 +104,7 @@ public class SuperHeroesControllerTest {
 
         //Assert
         String path = String.format("%s/findByContainsName/%s", API_PATH, searchName);
-        mockMvc.perform(get(path).contentType("application/json")).andExpect(status().isOk());
+        mockMvc.perform(get(path).contentType(MediaType.APPLICATION_JSON_VALUE)).andExpect(status().isOk());
     }
 
     @Test
@@ -114,9 +118,71 @@ public class SuperHeroesControllerTest {
 
         //Assert
         String path = String.format("%s/findByContainsName/%s", API_PATH, searchName);
-        mockMvc.perform(get(path).contentType("application/json"))
+        mockMvc.perform(get(path).contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.size()").value(resultSuperHeroesList.size()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$[*].name").isNotEmpty());
+    }
+
+    @Test
+    void updateSuperHero_Expect200Code_ResponseOK() throws Exception {
+        SuperHero superHero = superHeroesList.get(0);
+        String newName = "San Juan";
+
+        // Act
+        superHero.setName(newName);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String bodyJson = objectMapper.writeValueAsString(superHero);
+        when(superHeroService.updateSuperHero(superHero)).thenReturn(superHero);
+
+        //Assert
+        MockHttpServletRequestBuilder builder =
+                MockMvcRequestBuilders.put(API_PATH)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(bodyJson);
+
+        mockMvc.perform(builder).andExpect(status().isOk());
+    }
+
+    @Test
+    void updateSuperHero_ExpectSuperHeroModified_ResponseOK() throws Exception {
+        SuperHero superHero = superHeroesList.get(0);
+        String newName = "San Juan";
+
+        // Act
+        superHero.setName(newName);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String bodyJson = objectMapper.writeValueAsString(superHero);
+        when(superHeroService.updateSuperHero(superHero)).thenReturn(superHero);
+
+        //Assert
+        MockHttpServletRequestBuilder builder =
+                MockMvcRequestBuilders.put(API_PATH)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(bodyJson);
+
+        mockMvc.perform(builder)
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("id").value(superHero.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("name").value(newName));
+    }
+
+    @Test
+    void deleteSuperHeroById_Expect204Code_ResponseNoContent() throws Exception {
+        SuperHero superHero = superHeroesList.get(0);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String bodyJson = objectMapper.writeValueAsString(superHero);
+
+        //Assert
+        MockHttpServletRequestBuilder builder =
+                MockMvcRequestBuilders.delete(API_PATH)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .content(bodyJson);
+
+        mockMvc.perform(builder)
+                .andExpect(status().isNoContent());
     }
 }

@@ -12,9 +12,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -27,7 +30,7 @@ public class SuperHeroServiceTest {
 
     @Test
     void getAllSuperHeroes_ExpectNotSuperHeroesException() {
-        try{
+        try {
             //Arrange
             List<SuperHero> superHeroesList = new ArrayList<>();
 
@@ -35,7 +38,7 @@ public class SuperHeroServiceTest {
             when(superHeroesRepository.findAll()).thenReturn(superHeroesList);
             List<SuperHero> result = superHeroesService.getAllSuperHeroes();
             fail("Must run the NotSuperHeroesException before this");
-        }catch(NotSuperHeroesException e){
+        } catch (NotSuperHeroesException e) {
             assertEquals("There are not super heroes in the database", e.getMessage());
         }
     }
@@ -63,7 +66,7 @@ public class SuperHeroServiceTest {
 
     @Test
     void getSuperHeroById_ExpectNotSuperHeroFoundException() {
-        try{
+        try {
             //Arrange
             List<SuperHero> superHeroesList = new ArrayList<>();
             superHeroesList.add(new SuperHero(1, "Superman"));
@@ -78,34 +81,28 @@ public class SuperHeroServiceTest {
             when(superHeroesRepository.findById(23L)).thenReturn(Optional.ofNullable(superHeroMock));
             SuperHero result = superHeroesService.getSuperHeroByID(23L);
             fail("Must run the NotSuperHeroFoundException before this");
-        }catch(NotSuperHeroFoundException e){
+        } catch (NotSuperHeroFoundException e) {
             assertEquals("There are not super hero with that ID", e.getMessage());
         }
     }
 
     @Test
-    void getSuperHeroesByContainsName_ExpectNotSuperHeroesException() {
-        try {
-            //Arrange
-            List<SuperHero> superHeroesList = new ArrayList<>();
-            superHeroesList.add(new SuperHero(1, "Superman"));
-            superHeroesList.add(new SuperHero(2, "Batman"));
-            superHeroesList.add(new SuperHero(3, "Spiderman"));
-            superHeroesList.add(new SuperHero(4, "Manolito El Fuerte"));
-            superHeroesList.add(new SuperHero(5, "El flautista"));
-            superHeroesList.add(new SuperHero(6, "Robert Widow"));
+    void getSuperHeroById_ExpectSuperHero() {
+        //Arrange
+        List<SuperHero> superHeroesList = new ArrayList<>();
+        superHeroesList.add(new SuperHero(1, "Superman"));
+        superHeroesList.add(new SuperHero(2, "Batman"));
+        superHeroesList.add(new SuperHero(3, "Spiderman"));
+        superHeroesList.add(new SuperHero(4, "Manolito El Fuerte"));
+        superHeroesList.add(new SuperHero(5, "El flautista"));
+        superHeroesList.add(new SuperHero(6, "Robert Widow"));
 
-            //Act
-            String partialName = "conoo";
-            List<SuperHero> resultSuperHeroesList = superHeroesList.stream().filter(superHero -> superHero.getName()
-                    .toLowerCase().contains(partialName)).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
-            when(superHeroesRepository.findByNameContaining(partialName)).thenReturn(resultSuperHeroesList);
-            List<SuperHero> result = superHeroesService.getSuperHeroByPartOfName(partialName);
-            fail("Must run the NotSuperHeroesException before this");
-        }catch(NotSuperHeroesException e){
-            //Assert
-            assertEquals("There are not super heroes in the database", e.getMessage());
-        }
+        //Act
+        Random random = new Random();
+        SuperHero superHeroMock = superHeroesList.get(random.nextInt(superHeroesList.size()));
+        when(superHeroesRepository.findById(superHeroMock.getId())).thenReturn(Optional.of(superHeroMock));
+        SuperHero result = superHeroesService.getSuperHeroByID(superHeroMock.getId());
+        assertEquals(superHeroMock, result);
     }
 
     @Test
@@ -128,5 +125,69 @@ public class SuperHeroServiceTest {
 
         //Assert
         assertEquals(resultSuperHeroesList, result);
+    }
+
+    @Test
+    void updateSuperHero_ExpectNotSuperHeroFoundException() {
+        try {
+            //Arrange
+            String newName = "Superman Modificado";
+            SuperHero superHero = new SuperHero(1, "Superman");
+
+            //Act
+            when(superHeroesRepository.findById(superHero.getId())).thenReturn(Optional.ofNullable(null));
+            superHero.setName("Superman Modificado");
+            superHeroesService.updateSuperHero(superHero);
+
+            fail("Must run the NotSuperHeroFoundException before this");
+        } catch (NotSuperHeroFoundException e) {
+            assertEquals("There are not super hero with that ID", e.getMessage());
+        }
+    }
+
+    @Test
+    void updateSuperHero_ExpectSuperHero() {
+        //Arrange
+        String newName = "Superman Modificado";
+        SuperHero superHero = new SuperHero(1, "Superman");
+
+        //Act
+        when(superHeroesRepository.findById(superHero.getId())).thenReturn(Optional.of(superHero));
+        superHero.setName("Superman Modificado");
+        SuperHero result = superHeroesService.updateSuperHero(superHero);
+
+        //Assert
+        assertEquals(superHero, result);
+        assertEquals(newName, result.getName());
+    }
+
+    @Test
+    void deleteSuperHeroById_ExpectNotSuperHeroFoundException() {
+        //Arrange
+        SuperHero superHero = new SuperHero(1, "Superman");
+
+        //Act
+        try{
+            when(superHeroesRepository.findById(superHero.getId())).thenReturn(Optional.ofNullable(null));
+            superHeroesService.deleteSuperHero(superHero);
+
+            //Assert
+            fail("Must run the NotSuperHeroFoundException before this");
+        } catch (NotSuperHeroFoundException e) {
+            assertEquals("There are not super hero with that ID", e.getMessage());
+        }
+    }
+
+    @Test
+    void deleteSuperHeroById_ExpectRemoveSuperHero() {
+        //Arrange
+        SuperHero superHero = new SuperHero(1, "Superman");
+
+        //Act
+        when(superHeroesRepository.findById(superHero.getId())).thenReturn(Optional.ofNullable(superHero));
+        superHeroesService.deleteSuperHero(superHero);
+
+        //Assert
+        verify(superHeroesRepository).delete(any(SuperHero.class));
     }
 }

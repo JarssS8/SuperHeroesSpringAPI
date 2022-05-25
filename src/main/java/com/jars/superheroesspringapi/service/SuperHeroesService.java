@@ -31,4 +31,20 @@ public class SuperHeroesService {
         if (superHeroesList.isEmpty()) throw new NotSuperHeroesException();
         return superHeroesList;
     }
+
+    public SuperHero updateSuperHero(SuperHero superHeroToModify) {
+        SuperHero superHero = superHeroesRepository.findById(superHeroToModify.getId()).orElse(null);
+        if (superHero == null) throw new NotSuperHeroFoundException();
+        superHero.modifySuperHero(superHeroToModify);
+        superHeroesRepository.save(superHero);
+        return superHero;
+    }
+
+    public void deleteSuperHero(SuperHero superHero) {
+        if (superHeroesRepository.findById(superHero.getId()).orElse(null) == null)
+            throw new NotSuperHeroFoundException();
+        superHeroesRepository.delete(superHero);
+    }
+
+
 }

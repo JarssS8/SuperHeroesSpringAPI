@@ -18,4 +18,10 @@ public class SuperHero {
     @NonNull
     private String name;
 
+    public void modifySuperHero(SuperHero superHeroToModify) {
+        if (!superHeroToModify.getName().isEmpty()){
+            this.name = superHeroToModify.getName();
+        }
+    }
+
 }
