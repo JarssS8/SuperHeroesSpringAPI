@@ -1,5 +1,6 @@
 package com.jars.superheroesspringapi.service;
 
+import com.jars.superheroesspringapi.dto.SuperHeroDto;
 import com.jars.superheroesspringapi.entity.SuperHero;
 import com.jars.superheroesspringapi.exceptionhandling.exceptions.NotSuperHeroFoundException;
 import com.jars.superheroesspringapi.exceptionhandling.exceptions.NotSuperHeroesException;
@@ -8,6 +9,7 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -25,12 +27,15 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class SuperHeroServiceTest {
+class SuperHeroServiceTest {
     @MockBean
     private SuperHeroesRepository superHeroesRepository;
 
     @Autowired
     private SuperHeroesService superHeroesService;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Test
     @Order(1)
@@ -138,7 +143,7 @@ public class SuperHeroServiceTest {
             SuperHero superHero = new SuperHero(1, "Superman");
 
             //Act
-            when(superHeroesRepository.findById(superHero.getId())).thenReturn(Optional.ofNullable(null));
+            when(superHeroesRepository.findById(superHero.getId())).thenReturn(Optional.empty());
             superHero.setName("Superman Modificado");
             superHeroesService.updateSuperHero(superHero);
 
@@ -157,10 +162,11 @@ public class SuperHeroServiceTest {
         //Act
         when(superHeroesRepository.findById(superHero.getId())).thenReturn(Optional.of(superHero));
         superHero.setName("Superman Modificado");
-        SuperHero result = superHeroesService.updateSuperHero(superHero);
+        SuperHeroDto result = superHeroesService.updateSuperHero(superHero);
 
         //Assert
-        assertEquals(superHero, result);
+
+        assertEquals(modelMapper.map(superHero, SuperHeroDto.class), result);
         assertEquals(newName, result.getName());
     }
 
@@ -171,7 +177,7 @@ public class SuperHeroServiceTest {
 
         //Act
         try{
-            when(superHeroesRepository.findById(superHero.getId())).thenReturn(Optional.ofNullable(null));
+            when(superHeroesRepository.findById(superHero.getId())).thenReturn(Optional.empty());
             superHeroesService.deleteSuperHero(superHero);
 
             //Assert
@@ -187,7 +193,7 @@ public class SuperHeroServiceTest {
         SuperHero superHero = new SuperHero(1, "Superman");
 
         //Act
-        when(superHeroesRepository.findById(superHero.getId())).thenReturn(Optional.ofNullable(superHero));
+        when(superHeroesRepository.findById(superHero.getId())).thenReturn(Optional.of(superHero));
         superHeroesService.deleteSuperHero(superHero);
 
         //Assert

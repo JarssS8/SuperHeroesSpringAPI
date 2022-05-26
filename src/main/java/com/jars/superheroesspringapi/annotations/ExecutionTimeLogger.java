@@ -18,7 +18,7 @@ public class ExecutionTimeLogger {
         long startTime = System.currentTimeMillis();
         Object obj = proceedingJoinPoint.proceed();
         long endTime = System.currentTimeMillis();
-        logger.info("Execution time for " + proceedingJoinPoint.getSignature() + ": " + (endTime - startTime) + " ms");
+        logger.info("Execution time for {}: {} ms", proceedingJoinPoint.getSignature(), (endTime - startTime));
         return obj;
     }
 }

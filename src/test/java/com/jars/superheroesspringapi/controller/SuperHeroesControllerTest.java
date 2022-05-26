@@ -1,10 +1,12 @@
 package com.jars.superheroesspringapi.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jars.superheroesspringapi.dto.SuperHeroDto;
 import com.jars.superheroesspringapi.entity.SuperHero;
 import com.jars.superheroesspringapi.service.SuperHeroesService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -22,10 +24,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(SuperHeroesController.class)
-public class SuperHeroesControllerTest {
+class SuperHeroesControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    ModelMapper modelMapper;
 
     @MockBean
     private SuperHeroesService superHeroService;
@@ -127,13 +132,14 @@ public class SuperHeroesControllerTest {
     @Test
     void updateSuperHero_Expect200Code_ResponseOK() throws Exception {
         SuperHero superHero = superHeroesList.get(0);
+        SuperHeroDto superHeroDto = modelMapper.map(superHeroesList.get(0), SuperHeroDto.class);
         String newName = "San Juan";
 
         // Act
-        superHero.setName(newName);
+        superHeroDto.setName(newName);
         ObjectMapper objectMapper = new ObjectMapper();
-        String bodyJson = objectMapper.writeValueAsString(superHero);
-        when(superHeroService.updateSuperHero(superHero)).thenReturn(superHero);
+        String bodyJson = objectMapper.writeValueAsString(superHeroDto);
+        when(superHeroService.updateSuperHero(superHero)).thenReturn(superHeroDto);
 
         //Assert
         MockHttpServletRequestBuilder builder =
@@ -148,13 +154,14 @@ public class SuperHeroesControllerTest {
     @Test
     void updateSuperHero_ExpectSuperHeroModified_ResponseOK() throws Exception {
         SuperHero superHero = superHeroesList.get(0);
+        SuperHeroDto superHeroDto = modelMapper.map(superHeroesList.get(0), SuperHeroDto.class);
         String newName = "San Juan";
 
         // Act
-        superHero.setName(newName);
+        superHeroDto.setName(newName);
         ObjectMapper objectMapper = new ObjectMapper();
         String bodyJson = objectMapper.writeValueAsString(superHero);
-        when(superHeroService.updateSuperHero(superHero)).thenReturn(superHero);
+        when(superHeroService.updateSuperHero(superHero)).thenReturn(superHeroDto);
 
         //Assert
         MockHttpServletRequestBuilder builder =

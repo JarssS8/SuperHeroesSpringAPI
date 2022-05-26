@@ -9,3 +9,6 @@ up: build
 
 output: build
 	docker run --rm -d -p 8080:8080 --name super-heroes-api super-heroes-api:latest
+
+sonar:
+	mvn clean install sonar:sonar
